@@ -1,0 +1,7 @@
+node_modules/
+apex-tech-server/node_modules/
+apex-tech-client/node_modules/
+.env
+apex-tech-server/.env
+dist/
+build/
