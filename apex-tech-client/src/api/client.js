@@ -17,6 +17,18 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
+// --- Auth-desync fix ---
+// The old version cleared localStorage here on a 401 but never told React
+// about it, so AuthContext kept believing the user was logged in while every
+// subsequent request kept silently failing (looked like "forced re-login on
+// add to cart"). AuthContext now subscribes via onUnauthorized() and calls
+// its own logout() the moment this fires, keeping storage and UI in sync.
+const unauthorizedListeners = new Set();
+export const onUnauthorized = (callback) => {
+  unauthorizedListeners.add(callback);
+  return () => unauthorizedListeners.delete(callback);
+};
+
 // Response interceptor: unwrap the backend's { success, data, message } shape
 // and normalize errors into something components can display directly.
 client.interceptors.response.use(
@@ -25,13 +37,12 @@ client.interceptors.response.use(
     const message =
       error.response?.data?.message ||
       error.message ||
-      'Something went wrong. Please try again.';
+      (error.code === 'ERR_NETWORK'
+        ? 'Cannot reach the server. Is the backend running?'
+        : 'Something went wrong. Please try again.');
 
-    // If the token is invalid/expired, clear it so the UI can fall back to
-    // logged-out state instead of silently failing every subsequent request.
     if (error.response?.status === 401) {
-      localStorage.removeItem('apexTechToken');
-      localStorage.removeItem('apexTechUser');
+      unauthorizedListeners.forEach((cb) => cb());
     }
 
     return Promise.reject({ message, status: error.response?.status });

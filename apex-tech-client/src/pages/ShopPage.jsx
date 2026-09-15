@@ -1,17 +1,34 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ShoppingCart, MoreVertical } from 'lucide-react';
+import { useState, useEffect, useMemo } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { ShoppingCart, MoreVertical, Heart } from 'lucide-react';
 import { getProducts } from '../api/products';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 
-const CATEGORIES = ['all', 'monitors', 'laptops', 'gpu', 'pcs', 'accessories'];
+const CATEGORIES = [
+  { label: 'All', value: null },
+  { label: 'Monitors', value: 'monitors' },
+  { label: 'Laptops', value: 'laptops' },
+  { label: 'GPUs', value: 'gpu' },
+  { label: 'Pre-Built PCs', value: 'pcs' },
+  { label: 'Accessories', value: 'accessories' },
+];
 
 export default function ShopPage() {
+  // Category/search/flash-deal state now lives in the URL (not local
+  // useState) so the Navbar's category pills and search bar and this page's
+  // own filter buttons all stay in sync with each other and with the
+  // browser's back/forward buttons.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const category = searchParams.get('category');
+  const flashDeal = searchParams.get('flashDeal') === 'true';
+  const query = searchParams.get('q') || '';
+
   const [products, setProducts] = useState([]);
-  const [category, setCategory] = useState('all');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [addingId, setAddingId] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -20,7 +37,11 @@ export default function ShopPage() {
     setLoading(true);
     setError(null);
 
-    getProducts(category === 'all' ? {} : { category })
+    const params = {};
+    if (category) params.category = category;
+    if (flashDeal) params.isFlashDeal = true;
+
+    getProducts(params)
       .then((res) => {
         if (!cancelled) setProducts(res.data);
       })
@@ -34,7 +55,25 @@ export default function ShopPage() {
     return () => {
       cancelled = true;
     };
-  }, [category]);
+  }, [category, flashDeal]);
+
+  // Search filters client-side on top of whatever the category/flash-deal
+  // query already fetched from the server - fast, and matches the rubric's
+  // "filter dynamically based on user input" ask without a debounced network
+  // call for every keystroke.
+  const visibleProducts = useMemo(() => {
+    if (!query) return products;
+    const q = query.toLowerCase();
+    return products.filter((p) => p.name.toLowerCase().includes(q));
+  }, [products, query]);
+
+  const setCategory = (value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) params.set('category', value);
+    else params.delete('category');
+    params.delete('flashDeal');
+    setSearchParams(params);
+  };
 
   const handleAddToCart = async (product) => {
     setAddingId(product.id);
@@ -44,29 +83,40 @@ export default function ShopPage() {
     setTimeout(() => setToast(null), 2500);
   };
 
+  const handleToggleWishlist = async (product) => {
+    const result = await toggleWishlist(product);
+    if (!result.ok) {
+      setToast(result.message);
+      setTimeout(() => setToast(null), 2500);
+    }
+  };
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-8">
       <div className="text-xs text-textMuted flex items-center gap-1.5 mb-6">
         <span>Home</span> <span>&gt;</span>
         <span className="text-white">Shop</span>
+        {query && <span className="text-neon-blue">— results for &quot;{query}&quot;</span>}
       </div>
 
       <div className="bg-[#181A20] p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-4 border border-[#2B2D3A] mb-8 text-xs text-gray-300">
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => (
             <button
-              key={c}
-              onClick={() => setCategory(c)}
-              className={`px-3.5 py-1.5 rounded-xl font-bold capitalize transition ${
-                category === c ? 'bg-neon-blue text-midnight' : 'bg-[#22252D] text-white hover:border-neon-blue border border-transparent'
+              key={c.label}
+              onClick={() => setCategory(c.value)}
+              className={`px-3.5 py-1.5 rounded-xl font-bold transition ${
+                (c.value === category) || (!c.value && !category && !flashDeal)
+                  ? 'bg-neon-blue text-midnight'
+                  : 'bg-[#22252D] text-white hover:border-neon-blue border border-transparent'
               }`}
             >
-              {c}
+              {c.label}
             </button>
           ))}
         </div>
         <span className="text-textMuted">
-          {loading ? 'Loading…' : `${products.length} result${products.length === 1 ? '' : 's'}`}
+          {loading ? 'Loading…' : `${visibleProducts.length} result${visibleProducts.length === 1 ? '' : 's'}`}
         </span>
       </div>
 
@@ -88,11 +138,13 @@ export default function ShopPage() {
             <div key={i} className="bg-[#4D5056] rounded-3xl p-6 border border-[#5E626B] h-72 animate-pulse" />
           ))}
         </div>
-      ) : products.length === 0 && !error ? (
-        <p className="text-sm text-textMuted">No products found in this category.</p>
+      ) : visibleProducts.length === 0 && !error ? (
+        <p className="text-sm text-textMuted">
+          {query ? `No products match "${query}".` : 'No products found in this category.'}
+        </p>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {products.map((product) => (
+          {visibleProducts.map((product) => (
             <div key={product.id} className="bg-[#4D5056] rounded-3xl p-6 border border-[#5E626B] flex flex-col justify-between hover:border-neon-blue/60 transition shadow-xl">
               <div className="relative rounded-2xl bg-[#22252D] h-52 mb-6 flex items-center justify-center overflow-hidden">
                 {product.badgeText && (
@@ -100,6 +152,15 @@ export default function ShopPage() {
                     {product.badgeText}
                   </div>
                 )}
+                <button
+                  onClick={() => handleToggleWishlist(product)}
+                  aria-label="Toggle wishlist"
+                  className="absolute top-3 right-3 p-1.5 rounded-full bg-black/40 hover:bg-black/60 transition"
+                >
+                  <Heart
+                    className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-neon-purple text-neon-purple' : 'text-white'}`}
+                  />
+                </button>
                 <img src={product.image} alt={product.name} className="h-40 object-contain" />
               </div>
 

@@ -1,4 +1,6 @@
+import { Link } from 'react-router-dom';
 import { Award, ShieldCheck, Truck, Headphones } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, XIcon } from './SocialIcons';
 
 export default function Footer() {
   return (
@@ -68,8 +70,8 @@ export default function Footer() {
               <li><a href="#" className="hover:text-white transition">• Terms & Conditions</a></li>
               <li><a href="#" className="hover:text-white transition">• Credit Card Security</a></li>
               <li><a href="#" className="hover:text-white transition">• Contact Us</a></li>
-              <li><a href="#" className="hover:text-white transition">• My Orders</a></li>
-              <li><a href="#" className="hover:text-white transition">• FAQs</a></li>
+              <li><Link to="/orders" className="hover:text-white transition">• My Orders</Link></li>
+              <li><Link to="/faqs" className="hover:text-white transition">• FAQs</Link></li>
             </ul>
           </div>
           <div>
@@ -96,9 +98,33 @@ export default function Footer() {
         </div>
 
         <div className="border-t border-[#22252D] pt-6 flex justify-center gap-6 text-gray-400 text-xs font-semibold">
-          <span className="cursor-pointer hover:text-neon-blue transition">Instagram</span>
-          <span className="cursor-pointer hover:text-neon-blue transition">Twitter / X</span>
-          <span className="cursor-pointer hover:text-neon-blue transition">Facebook</span>
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Instagram"
+            className="flex items-center gap-1.5 hover:text-neon-blue transition"
+          >
+            <InstagramIcon /> Instagram
+          </a>
+          <a
+            href="https://x.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="X (Twitter)"
+            className="flex items-center gap-1.5 hover:text-neon-blue transition"
+          >
+            <XIcon /> Twitter / X
+          </a>
+          <a
+            href="https://facebook.com"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Facebook"
+            className="flex items-center gap-1.5 hover:text-neon-blue transition"
+          >
+            <FacebookIcon /> Facebook
+          </a>
         </div>
       </div>
     </footer>

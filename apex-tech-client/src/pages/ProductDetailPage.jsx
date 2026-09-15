@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Heart } from 'lucide-react';
 import { getProductById } from '../api/products';
 import { useCart } from '../context/CartContext';
+import { useWishlist } from '../context/WishlistContext';
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -12,6 +13,7 @@ export default function ProductDetailPage() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
   const { addToCart } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   useEffect(() => {
     let cancelled = false;
@@ -99,13 +101,22 @@ export default function ProductDetailPage() {
 
           {toast && <p className="text-[11px] font-bold text-neon-green">{toast}</p>}
 
-          <button
-            onClick={handleAddToCart}
-            disabled={product.stock === 0}
-            className="w-full bg-[#3B3E45] hover:bg-neon-blue hover:text-midnight text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 text-xs transition disabled:opacity-40"
-          >
-            <ShoppingCart className="w-4 h-4" /> Add to Cart
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleAddToCart}
+              disabled={product.stock === 0}
+              className="flex-1 bg-[#3B3E45] hover:bg-neon-blue hover:text-midnight text-white font-bold py-3 rounded-2xl flex items-center justify-center gap-2 text-xs transition disabled:opacity-40"
+            >
+              <ShoppingCart className="w-4 h-4" /> Add to Cart
+            </button>
+            <button
+              onClick={() => toggleWishlist(product)}
+              aria-label="Toggle wishlist"
+              className="px-4 rounded-2xl bg-[#2B2D3A] hover:bg-neon-purple/20 transition"
+            >
+              <Heart className={`w-4 h-4 ${isInWishlist(product.id) ? 'fill-neon-purple text-neon-purple' : 'text-white'}`} />
+            </button>
+          </div>
         </div>
       </div>
 
@@ -118,6 +129,27 @@ export default function ProductDetailPage() {
           {product.category}
         </span>
       </div>
+
+      {/* Specification matrix - only renders when the product has specs
+          (seed data includes them for some products; older rows without
+          specs just skip this section rather than show an empty table). */}
+      {product.specs && Object.keys(product.specs).length > 0 && (
+        <div className="pt-6 border-t border-[#22252D] space-y-4">
+          <h2 className="text-sm font-bold text-white">Specifications</h2>
+          <div className="bg-[#181A20] border border-[#2B2D3A] rounded-2xl overflow-hidden">
+            <table className="w-full text-xs">
+              <tbody>
+                {Object.entries(product.specs).map(([key, value], i) => (
+                  <tr key={key} className={i % 2 === 0 ? 'bg-[#181A20]' : 'bg-[#1D1F27]'}>
+                    <td className="px-5 py-3 font-semibold text-gray-300 w-1/3">{key}</td>
+                    <td className="px-5 py-3 text-white">{value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -20,9 +20,14 @@ const Product = sequelize.define('Product', {
   description: { type: DataTypes.TEXT, allowNull: true },
   badgeText: { type: DataTypes.STRING(100), allowNull: true },
   isFlashDeal: { type: DataTypes.BOOLEAN, defaultValue: false },
+  // Key/value spec matrix for ProductDetailPage, e.g.
+  // { "Panel Type": "Fast IPS", "Refresh Rate": "180Hz" }. Optional/nullable
+  // so existing seed rows without specs still work.
+  specs: { type: DataTypes.JSON, allowNull: true },
 }, {
   tableName: 'products',
   timestamps: true,
 });
 
 export default Product;
+

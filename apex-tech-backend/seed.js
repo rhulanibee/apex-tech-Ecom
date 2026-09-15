@@ -14,6 +14,14 @@ const products = [
     description: '24" 100Hz IPS Gaming & Productivity Display',
     badgeText: '24" 120Hz FHD 1ms',
     isFlashDeal: false,
+    specs: {
+      'Screen Size': '24"',
+      'Panel Type': 'IPS',
+      'Refresh Rate': '100Hz',
+      'Response Time': '1ms',
+      'Resolution': '1920 x 1080 (FHD)',
+      'Ports': 'HDMI, DisplayPort, VGA',
+    },
   },
   {
     name: 'LG UltraGear 24GS60F 24" FHD IPS',
@@ -24,6 +32,14 @@ const products = [
     description: 'Ultra-fast 180Hz gaming display with HDR10',
     badgeText: '24" 180Hz FHD 1ms',
     isFlashDeal: false,
+    specs: {
+      'Screen Size': '24"',
+      'Panel Type': 'IPS',
+      'Refresh Rate': '180Hz',
+      'Response Time': '1ms',
+      'Resolution': '1920 x 1080 (FHD)',
+      'HDR': 'HDR10',
+    },
   },
   {
     name: 'MSI PRO MP275 E2 27" 120Hz Monitor',
