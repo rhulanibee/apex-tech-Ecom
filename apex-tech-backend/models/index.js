@@ -5,6 +5,8 @@ import Cart from './Cart.js';
 import CartItem from './CartItem.js';
 import Order from './Order.js';
 import OrderItem from './OrderItem.js';
+import Wishlist from './Wishlist.js';
+import WishlistItem from './WishlistItem.js';
 
 // Associations (none of these existed before, which is why repository
 // `include: [CartItem]` / `include: [OrderItem]` calls would have failed
@@ -23,4 +25,4 @@ Order.hasMany(OrderItem, { foreignKey: 'orderId' });
 OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
 OrderItem.belongsTo(Product, { foreignKey: 'productId' });
 
-export { sequelize, User, Product, Cart, CartItem, Order, OrderItem };
+export { sequelize, User, Product, Cart, CartItem, Order, OrderItem, Wishlist, WishlistItem };

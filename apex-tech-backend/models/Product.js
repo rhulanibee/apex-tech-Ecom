@@ -15,14 +15,27 @@ const Product = sequelize.define('Product', {
     allowNull: false,
   },
   price: { type: DataTypes.DECIMAL(10, 2), allowNull: false },
+  // Original/list price before a flash deal markdown. Null for regular-priced
+  // items. Used to compute the "-20%" style badge on the Flash Deals page.
+  compareAtPrice: { type: DataTypes.DECIMAL(10, 2), allowNull: true },
   stock: { type: DataTypes.INTEGER, defaultValue: 0 },
   image: { type: DataTypes.STRING(500), allowNull: false },
+  // Gallery thumbnails for ProductDetailPage. Nullable - falls back to a
+  // single-image array built from `image` on the frontend if empty, so
+  // older rows without a gallery still render fine.
+  images: { type: DataTypes.JSON, allowNull: true },
   description: { type: DataTypes.TEXT, allowNull: true },
   badgeText: { type: DataTypes.STRING(100), allowNull: true },
   isFlashDeal: { type: DataTypes.BOOLEAN, defaultValue: false },
+  // Key/value spec matrix for ProductDetailPage, e.g.
+  // { "Panel Type": "Fast IPS", "Refresh Rate": "180Hz" }. Optional/nullable
+  // so existing seed rows without specs still work.
+  specs: { type: DataTypes.JSON, allowNull: true },
 }, {
   tableName: 'products',
   timestamps: true,
 });
 
 export default Product;
+
+

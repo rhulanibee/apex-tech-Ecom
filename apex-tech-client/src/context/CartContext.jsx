@@ -4,6 +4,7 @@ import { useAuth } from './AuthContext';
 
 const CartContext = createContext(null);
 
+// eslint-disable-next-line react/prop-types
 export function CartProvider({ children }) {
   const { isAuthenticated } = useAuth();
   const [cart, setCart] = useState(null); // backend cart shape: { id, CartItems: [...] }
@@ -89,4 +90,5 @@ export function CartProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useCart = () => useContext(CartContext);
