@@ -14,6 +14,8 @@ import LoginPage from './pages/LoginPage';
 import WishlistPage from './pages/WishlistPage';
 import OrdersPage from './pages/OrdersPage';
 import FAQPage from './pages/FAQPage';
+import FlashDealsPage from './pages/FlashDealsPage';
+import AboutPage from './pages/AboutPage';
 import NotFoundPage from './pages/NotFoundPage';
 
 export default function App() {
@@ -36,6 +38,8 @@ export default function App() {
                     <Route path="/wishlist" element={<WishlistPage/>}/>
                     <Route path="/orders" element={<OrdersPage/>}/>
                     <Route path="/faqs" element={<FAQPage/>}/>
+                    <Route path="/flash-deals" element={<FlashDealsPage/>}/>
+                    <Route path="/about" element={<AboutPage/>}/>
                     <Route path="*" element={<NotFoundPage/>}/>
                   </Routes>
                 </main>

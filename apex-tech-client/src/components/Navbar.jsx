@@ -28,7 +28,6 @@ export default function Navbar() {
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
 
   const activeCategory = searchParams.get('category');
-  const isFlashActive = searchParams.get('flashDeal') === 'true';
   const onShopPage = location.pathname === '/shop';
 
   const handleSearchSubmit = (e) => {
@@ -43,21 +42,21 @@ export default function Navbar() {
   };
 
   const isCategoryActive = (cat) => {
+    if (cat.flash) return location.pathname === '/flash-deals';
     if (!onShopPage) return false;
-    if (cat.flash) return isFlashActive;
-    if (cat.param === null) return !activeCategory && !isFlashActive;
+    if (cat.param === null) return !activeCategory;
     return activeCategory === cat.param;
   };
 
   const categoryHref = (cat) => {
-    if (cat.flash) return '/shop?flashDeal=true';
+    if (cat.flash) return '/flash-deals';
     if (cat.param === null) return '/shop';
     return `/shop?category=${cat.param}`;
   };
 
   return (
     <header className="w-full bg-[#0B0E14] border-b border-[#22252D] sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-4">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full border border-neon-blue flex items-center justify-center">
             <span className="text-neon-blue font-black text-xs">▲</span>
@@ -65,7 +64,7 @@ export default function Navbar() {
           <span className="text-xl font-bold tracking-wider text-white">Apex Tech</span>
         </Link>
 
-        <form onSubmit={handleSearchSubmit} className="flex-1 max-w-xl relative">
+        <form onSubmit={handleSearchSubmit} className="flex-1 min-w-[160px] order-3 sm:order-2 max-w-xl relative">
           <input
             type="text"
             value={searchTerm}
@@ -78,7 +77,7 @@ export default function Navbar() {
           </button>
         </form>
 
-        <div className="flex items-center gap-6 text-gray-300">
+        <div className="flex items-center gap-6 text-gray-300 order-2 sm:order-3">
           {isAuthenticated ? (
             <button
               onClick={logout}
@@ -112,14 +111,14 @@ export default function Navbar() {
       </div>
 
       <nav className="bg-[#12141A] border-t border-[#22252D]">
-        <div className="max-w-7xl mx-auto px-6 py-2 flex items-center justify-between gap-6 text-xs text-gray-300 font-medium flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2 flex items-center justify-between gap-6 text-xs text-gray-300 font-medium flex-wrap">
           <div className="flex items-center gap-4">
             <Link to="/shop" className="hover:text-neon-blue transition font-bold uppercase tracking-wide">Shop</Link>
             <Link to="/faqs" className="hover:text-neon-blue transition font-bold uppercase tracking-wide">Support</Link>
             <Link to="/orders" className="hover:text-neon-blue transition font-bold uppercase tracking-wide">My Orders</Link>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center gap-3 text-xs text-gray-300 font-medium border-t border-[#1B1E26] flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-3 text-xs text-gray-300 font-medium border-t border-[#1B1E26] flex-wrap">
           {/* Every category link gets the SAME pill treatment when active -
              previously only "Menu" got a background, everything else just
              changed text color, which read as inconsistent. */}
