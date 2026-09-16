@@ -4,7 +4,7 @@ import axios from 'axios';
 // import THIS instead of calling axios directly, so base URL, auth headers,
 // and error handling live in exactly one place.
 const client = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+baseURL: import.meta.env.VITE_API_URL || 'http://192.168.1.133:3000/api',
   headers: { 'Content-Type': 'application/json' },
 });
 
