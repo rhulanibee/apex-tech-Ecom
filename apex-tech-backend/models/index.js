@@ -8,9 +8,6 @@ import OrderItem from './OrderItem.js';
 import Wishlist from './Wishlist.js';
 import WishlistItem from './WishlistItem.js';
 
-// Associations (none of these existed before, which is why repository
-// `include: [CartItem]` / `include: [OrderItem]` calls would have failed
-// even once the require/import crashes were fixed).
 User.hasMany(Cart, { foreignKey: 'userId' });
 Cart.belongsTo(User, { foreignKey: 'userId' });
 
@@ -24,5 +21,10 @@ Order.belongsTo(User, { foreignKey: 'userId' });
 Order.hasMany(OrderItem, { foreignKey: 'orderId' });
 OrderItem.belongsTo(Order, { foreignKey: 'orderId' });
 OrderItem.belongsTo(Product, { foreignKey: 'productId' });
+
+// 👉 Add these lines for the wishlist relations:
+Wishlist.hasMany(WishlistItem, { foreignKey: 'wishlistId' });
+WishlistItem.belongsTo(Wishlist, { foreignKey: 'wishlistId' });
+WishlistItem.belongsTo(Product, { foreignKey: 'productId' });
 
 export { sequelize, User, Product, Cart, CartItem, Order, OrderItem, Wishlist, WishlistItem };
