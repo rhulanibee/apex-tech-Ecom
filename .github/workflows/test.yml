@@ -1,0 +1,101 @@
+name: Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    # FIX: the original ran npm from the repo root, where there is no
+    # package.json. Everything backend-related must run in this folder.
+    defaults:
+      run:
+        working-directory: apex-tech-backend
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: apextechDB
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+
+    steps:
+      - uses: actions/checkout@v4          # FIX: was v3
+
+      - uses: actions/setup-node@v4        # FIX: was v3
+        with:
+          node-version: 20                 # FIX: was 18
+          cache: npm
+          cache-dependency-path: apex-tech-backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup environment
+        run: |
+          echo "DB_HOST=127.0.0.1"                   >  .env
+          echo "DB_PORT=3306"                        >> .env
+          echo "DB_USER=root"                        >> .env
+          echo "DB_PASS=root"                        >> .env
+          echo "DB_NAME=apextechDB"                  >> .env
+          echo "JWT_SECRET=ci_only_test_secret"      >> .env
+          echo "JWT_EXPIRES_IN=1h"                   >> .env
+          echo "CLIENT_ORIGIN=http://localhost:5173" >> .env
+          echo "NODE_ENV=test"                       >> .env
+
+      # Unit tests are fully mocked, so they need no server and no database.
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Seed database
+        run: npm run seed
+
+      - name: Start API server
+        run: node index.js &
+
+      - name: Wait for API to respond
+        # FIX: the original used a blind `sleep 5`, which is flaky. This
+        # polls until the server actually answers, then fails fast if not.
+        run: |
+          for i in {1..30}; do
+            curl -sf http://localhost:3000/ && exit 0
+            sleep 2
+          done
+          echo "API did not start in time"; exit 1
+
+      - name: Run integration tests
+        run: npm run test:integration
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4   # FIX: v3 is retired and now fails
+        if: always()
+        with:
+          name: coverage-report
+          path: apex-tech-backend/coverage/
+
+  build-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apex-tech-client
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apex-tech-client/package-lock.json
+      - run: npm ci
+      # Catches case-sensitivity import bugs that Windows hides locally.
+      - run: npm run build

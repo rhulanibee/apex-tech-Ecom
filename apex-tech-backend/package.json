@@ -7,7 +7,12 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
-    "seed": "node seed.js"
+    "seed": "node seed.js",
+    "test": "vitest run tests/unit",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run tests/unit --coverage",
+    "test:api": "vitest run tests/api.test.js",
+    "test:integration": "vitest run tests/integration"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -20,6 +25,10 @@
     "sequelize": "^6.37.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "vitest": "^2.1.8",
+    "@vitest/coverage-v8": "^2.1.8",
+    "supertest": "^7.0.0",
+    "axios": "^1.7.9"
   }
 }
